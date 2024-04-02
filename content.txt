@@ -1,0 +1,28 @@
+##Scenario##
+Build a tasklist system
+Users need to be able to login
+Users need to be able to Create, Update and delete tasklist
+Each users tasks will be private to them (and can only be viewed by themselves)
+We will set up the database for the backend, the web services and the authentication module
+
+##What is REST##
+REST => Representational state transfer.
+A REST API is an interface that is stateless (Each request stands alone without knowledge
+of previous requests).
+
+It uses a CLIENT <-> SERVER model via REQUEST -> RESPONSE architecture.
+It makes use of standard HTTP status codes and verbs like (CRUD):
+POST    =   CREATE
+GET     =   READ
+PATCH   =   UPDATE
+DELETE  =   DELETE
+
+REST is not a standard or framework. It is merely a set of principles should follow to make it Restful
+
+REST is preferred over SOAP due to its simpler implementation and uses JSON for the response output.
+JSON is more simple than XML (which is what SOAP uses).
+
+##What can you use an API for?##
+1. Load and update data using a client application (mobile/desktop) to a back-end system.
+2. Upload an image to a social network.
+
