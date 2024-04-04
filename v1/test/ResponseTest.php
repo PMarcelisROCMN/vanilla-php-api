@@ -1,6 +1,6 @@
 <?php
 
-require_once('Response.php');
+require_once('../model/Response.php');
 
 $response = new Response();
 

@@ -1,6 +1,6 @@
 <?php
 
-require_once('DB.php');
+require_once('../controller/DB.php');
 require_once('../model/Response.php');
 
 try{
