@@ -1,1 +1,10 @@
 php_flag display_errors on
+
+RewriteEngine On
+
+# don't rewrite if it's a directory (folder) or file
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# rewrite all other URLs to controller/task.php to tasks/id
+RewriteRule ^tasks/([0-9]+)$ controller/task.php?taskid=$1 [L]
