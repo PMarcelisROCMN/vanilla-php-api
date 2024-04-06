@@ -1,5 +1,7 @@
+# display errors on for debugging purposes
 php_flag display_errors on
 
+# enable mod_rewrite for friendly URLs (e.g. tasks/1 instead of controller/task.php?taskid=1)
 RewriteEngine On
 
 # don't rewrite if it's a directory (folder) or file
@@ -8,5 +10,13 @@ RewriteCond %{REQUEST_FILENAME} !-f
 
 # rewrite all other URLs to controller/task.php to tasks/id
 RewriteRule ^tasks/([0-9]+)$ controller/task.php?taskid=$1 [L]
+
+# rewrite all other URLs to controller/task.php to tasks/complete or tasks/incomplete
 RewriteRule ^tasks/complete controller/task.php?completed=Y [L]
 RewriteRule ^tasks/incomplete controller/task.php?completed=N [L]
+
+# get all tasks but with pagination
+RewriteRule ^tasks/page/([0-9]+)$ controller/task.php?page=$1 [L]
+
+# get all tasks
+RewriteRule ^tasks controller/task.php [L]
