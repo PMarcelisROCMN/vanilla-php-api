@@ -19,4 +19,8 @@ RewriteRule ^tasks/incomplete controller/task.php?completed=N [L]
 RewriteRule ^tasks/page/([0-9]+)$ controller/task.php?page=$1 [L]
 
 # get all tasks
+# todo: find a way to add sortby and order when retrieving all tasks
 RewriteRule ^tasks controller/task.php [L]
+
+# [L] = Last Rule - stop processing if this rule matches
+# [QSA] = Query String Append - keep the query string when rewriting
