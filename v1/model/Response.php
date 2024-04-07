@@ -18,7 +18,7 @@ class Response {
     }
 
     public function addMessage($message) {
-        $this->_message = $message;
+        $this->_message[] = $message;
     }
 
     public function setData($data) {
