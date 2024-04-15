@@ -22,5 +22,7 @@ RewriteRule ^tasks/page/([0-9]+)$ controller/task.php?page=$1 [L]
 # todo: find a way to add sortby and order when retrieving all tasks
 RewriteRule ^tasks controller/task.php [L]
 
+RewriteRule ^users$ controller/users.php [L]
+
 # [L] = Last Rule - stop processing if this rule matches
 # [QSA] = Query String Append - keep the query string when rewriting
