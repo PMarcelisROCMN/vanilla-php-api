@@ -15,7 +15,7 @@ try
     header('Content-type: application/json;charset=UTF-8');
     echo json_encode($task->returnTaskAsArray());
 
-}catch(Exception $e)
+}catch(Exception $ex)
 {
-    echo 'Caught exception: ', $e->getMessage(), "\n";
+    echo 'Caught exception: ', $ex->getMessage(), "\n";
 }

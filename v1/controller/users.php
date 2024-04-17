@@ -7,8 +7,8 @@ require_once '../model/Response.php';
 try {
     $writeDB = DB::connectWriteDB();
 }
-catch (Exception $e) {
-    error_log("Connection error: " . $e->getMessage(), 0);
+catch (Exception $ex) {
+    error_log("Connection error: " . $ex->getMessage(), 0);
 
     $response = new Response();
     $response->setSuccess(false);
@@ -141,7 +141,7 @@ try {
     exit;
     
 }
-catch (PDOException $e){
+catch (PDOException $ex){
     $response = new Response();
     $response->setSuccess(false);
     $response->setHttpStatusCode(500);
