@@ -1,5 +1,7 @@
 # display errors on for debugging purposes
 php_flag display_errors on
+# if it's passed in, use this default header
+SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
 
 # enable mod_rewrite for friendly URLs (e.g. tasks/1 instead of controller/task.php?taskid=1)
 RewriteEngine On

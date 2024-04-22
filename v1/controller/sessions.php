@@ -19,11 +19,90 @@ catch (PDOException $ex)
     exit;
 }
 
-// access specific session???
+// Delete or update a specific session
 if (array_key_exists("sessionid", $_GET)){
+
+    $sessionid = $_GET['sessionid'];
+
+    // validation for the sessionid
+    if ($sessionid === '' || !is_numeric($sessionid)){
+        $response = new Response();
+        $response->setSuccess(false);
+        $response->setHttpStatusCode(400);
+        $sessionid === '' ? $response->addMessage("Session ID cannot be blank") : false;
+        !is_numeric($sessionid) ? $response->addMessage("Session ID must be numeric") : false;
+        $response->send();
+        exit;
+    }
+
+    // check if the HTTP Authorization header is set or if the length is less than 1
+    if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) < 1){
+        $response = new Response();
+        $response->setSuccess(false);
+        $response->setHttpStatusCode(401);
+        !isset($_SERVER['HTTP_AUTHORIZATION']) ? $response->addMessage("Access token is missing from the header") : false;
+        strlen($_SERVER['HTTP_AUTHORIZATION']) < 1 ? $response->addMessage("Access token cannot be blank") : false;
+        $response->send();
+        exit;
+    }
+
+    // get the access token from the header
+    $accesstoken = $_SERVER['HTTP_AUTHORIZATION'];
+
+    // attempt to delete a row from the tblsessions table
+    if ($_SERVER['REQUEST_METHOD'] === 'DELETE'){
+    try {
+
+        $query = $writeDB->prepare('DELETE FROM tblsessions WHERE id = :sessionid AND accesstoken = :accesstoken');
+        $query->bindParam(':sessionid', $sessionid, PDO::PARAM_INT);
+        $query->bindParam(':accesstoken', $accesstoken, PDO::PARAM_STR);
+        $query->execute();
+
+        // get the number of rows affected
+        $rowCount = $query->rowCount();
+
+        // if the number of rows affected is 0, then the session was not deleted
+        if ($rowCount === 0){
+            $response = new Response();
+            $response->setSuccess(false);
+            $response->setHttpStatusCode(400);
+            $response->addMessage("Failed to log out of this session using this access token");
+            $response->send();
+            exit;
+        }
+
+        // if the session was deleted, return a success message
+        $returnData = array();
+        $returnData['session_id'] = intval($sessionid);
+
+        $response = new Response();
+        $response->setSuccess(true);
+        $response->setHttpStatusCode(200);
+        $response->addMessage("Logged out");
+        $response->setData($returnData);
+        $response->send();
+        exit;
+
+        // if there is an issue with the database, return an error message
+        }catch(PDOException $ex){
+            $response->setSuccess(false);
+            $response->setHttpStatusCode(500);
+            $response->addMessage("There was an issue logging out - please try again");
+            $response->send();
+            exit;
+        }
+    } else if ($_SERVER['REQUEST_METHOD'] === 'PATCH'){
+
+    } else {
+        $response = new Response();
+        $response->setSuccess(false);
+        $response->setHttpStatusCode(405);
+        $response->addMessage("Request method not allowed");
+        $response->send();
+        exit;
+    }
     
-    
-    // log in - create a new session
+// log in - create a new session
 }else if (empty($_GET)){
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST'){
