@@ -162,6 +162,7 @@ if (array_key_exists("sessionid", $_GET)){
 
         $returnData['session_id'] = $accessToken;
         $returnData['access_token'] = $accessToken;
+        
     } catch (PDOException $ex) {
         $response = new Response();
         $response->setHttpStatusCode(500);
@@ -213,7 +214,8 @@ if (array_key_exists("sessionid", $_GET)){
         $response = new Response();
         $response->setHttpStatusCode(500);
         $response->setSuccess(false);
-        $response->addMessage("There was an issue logging in - please try again");
+        $response->addMessage($ex);
+        $response->addMessage("TThere was an issue logging in - please try again");
         $response->send();
         exit;
     }

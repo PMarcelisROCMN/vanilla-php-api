@@ -27,7 +27,9 @@ RewriteRule ^users$ controller/users.php [L]
 # /sessions.php?sessionid=123
 RewriteRule ^sessions/([0-9+])$ controller/sessions.php?sessionid=$1 [L]
 
-RewriteRule ^sessions controller/sessions.php [L]
+RewriteRule ^sessions$ controller/sessions.php [L]
 
 # [L] = Last Rule - stop processing if this rule matches
 # [QSA] = Query String Append - keep the query string when rewriting
+# ^ = start of string
+# $ = end of string
