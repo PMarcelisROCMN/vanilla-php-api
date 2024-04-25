@@ -1,3 +1,8 @@
+# CORS options - allow all origins (can be called from any domain)
+Header Set Access-Control-Allow-Origin "*"
+# To restrict to specific headers, use:
+# Header set Access-Control-Allow-Methods "POST GET PUT DELETE"
+
 # display errors on for debugging purposes
 php_flag display_errors on
 # if it's passed in, use this default header

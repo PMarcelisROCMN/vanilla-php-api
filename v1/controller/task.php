@@ -4,10 +4,10 @@ require_once('db.php');
 require_once('../model/Task.php');
 require_once('../model/Response.php');
 
-require_once('../taskscrud/Create.php');
-require_once('../taskscrud/Update.php');
-require_once('../taskscrud/Read.php');
-require_once('../taskscrud/Delete.php');
+require_once('../taskHandlers/Create.php');
+require_once('../taskHandlers/Update.php');
+require_once('../taskHandlers/Read.php');
+require_once('../taskHandlers/Delete.php');
 
 try {
     $writeDB = DB::connectWriteDB();
