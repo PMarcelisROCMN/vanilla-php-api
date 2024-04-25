@@ -18,6 +18,21 @@ catch (Exception $ex) {
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
+    // only allowed methods are POST and OPTIONS
+    header('Access-Control-Allow-Methods: POST, OPTIONS');
+    // set the headers that are allowed
+    header('Access-Control-Allow-Headers: Content-Type');
+    // set the max age of the preflight request. 
+    // the same response can be called without sending a preflight request for the duration.
+    header('Access-Control-Max-Age: 86400');
+    $response = new Response();
+    $response->setSuccess(true);
+    $response->setHttpStatusCode(200);
+    $response->send();
+    exit;
+}
+
 // check if the user isn't using the correct post method
 // we will always be using post for user related requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST'){

@@ -99,6 +99,21 @@ try {
 }
 // end of authentication script
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
+    // only allowed methods are POST and OPTIONS
+    header('Access-Control-Allow-Methods: POST, GET, PATCH, DELETE, OPTIONS');
+    // set the headers that are allowed
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    // set the max age of the preflight request. 
+    // the same response can be called without sending a preflight request for the duration.
+    header('Access-Control-Max-Age: 86400');
+    $response = new Response();
+    $response->setSuccess(true);
+    $response->setHttpStatusCode(200);
+    $response->send();
+    exit;
+}
+
 // create all the objects that we need for creating, updating, reading and deleting tasks
 $taskRead = new Read($readDB);
 $taskCreate = new Create($writeDB, $readDB);
