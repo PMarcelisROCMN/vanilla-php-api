@@ -19,7 +19,7 @@ try {
     $response = new Response();
     $response->setSuccess(false);
     $response->setHttpStatusCode(500);
-    $response->addMessage("Database Connection Error");
+    $response->addMessage("Database Connection Error: " . $ex);
     $response->send();
     exit();
 }
