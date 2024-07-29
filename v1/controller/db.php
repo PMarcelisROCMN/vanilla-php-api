@@ -16,7 +16,7 @@ class DB {
 
     public static function connectReadDB() {
         if (self::$readDBConnection === null) {
-            self::$readDBConnection = new PDO('mysql:host=localhost;dbname=tasksdb;charset=utf8', 'root', '');
+            self::$readDBConnection = new PDO('mysql:host=localhost;dbname=tasksdb;charset=utf8', 'pmarcelisrocmn', 'rocmnpetermarcelis');
             self::$readDBConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             self::$readDBConnection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         }
