@@ -1,34 +1,37 @@
-# display errors on for debugging purposes
+# Display errors on for debugging purposes
 php_flag display_errors on
-# if it's passed in, use this default header
-SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
 
-# enable mod_rewrite for friendly URLs (e.g. tasks/1 instead of controller/task.php?taskid=1)
+# Ensure Authorization header is passed to PHP
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+# Enable mod_rewrite for friendly URLs (e.g. tasks/1 instead of controller/task.php?taskid=1)
 RewriteEngine On
 
-# don't rewrite if it's a directory (folder) or file
+# Don't rewrite if it's a directory (folder) or file
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 
-# rewrite all other URLs to controller/task.php to tasks/id
+# Rewrite all other URLs to controller/task.php to tasks/id
 RewriteRule ^tasks/([0-9]+)$ controller/task.php?taskid=$1 [L]
 
-# rewrite all other URLs to controller/task.php to tasks/complete or tasks/incomplete
+# Rewrite all other URLs to controller/task.php to tasks/complete or tasks/incomplete
 RewriteRule ^tasks/complete$ controller/task.php?completed=Y [L]
 RewriteRule ^tasks/incomplete$ controller/task.php?completed=N [L]
 
-# get all tasks but with pagination
+# Get all tasks but with pagination
 RewriteRule ^tasks/page/([0-9]+)$ controller/task.php?page=$1 [L]
 
-# get all tasks
-# todo: find a way to add sortby and order when retrieving all tasks
+# Get all tasks
+# Todo: find a way to add sortby and order when retrieving all tasks
 RewriteRule ^tasks$ controller/task.php [L]
 
+# Rewrite rule for users
 RewriteRule ^users$ controller/users.php [L]
 
 # /sessions.php?sessionid=123
-RewriteRule ^sessions/([0-9+])$ controller/sessions.php?sessionid=$1 [L]
+RewriteRule ^sessions/([0-9]+)$ controller/sessions.php?sessionid=$1 [L]
 
+# Rewrite rule for sessions
 RewriteRule ^sessions$ controller/sessions.php [L]
 
 # [L] = Last Rule - stop processing if this rule matches
