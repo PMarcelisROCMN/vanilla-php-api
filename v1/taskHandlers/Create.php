@@ -132,7 +132,7 @@ class Create{
             $response = new Response();
             $response->setSuccess(false);
             $response->setHttpStatusCode(500);
-            $response->addMessage('Failed to insert into database - check submitted data for errors');
+            $response->addMessage('Failed to insert into database - check submitted data for errors: ' . $ex);
             $response->send();
             exit();
         }
