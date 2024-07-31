@@ -8,12 +8,10 @@ class Create{
     public function __construct($readDB, $writeDB){
         $this->readDB = $readDB;
         $this->writeDB = $writeDB;
-
     }
 
     public function createTask($returned_userid){
         try {
-
             if ($_SERVER['CONTENT_TYPE'] !== 'application/json') {
                 $response = new Response();
                 $response->setSuccess(false);
@@ -63,12 +61,12 @@ class Create{
             $deadline = $newTask->getDeadline();
             $completed = $newTask->getCompleted();
 
-            $query = $this->writeDB->prepare('INSERT INTO tbltasks (title, description, deadline, completed) VALUES (:title, :description, STR_TO_DATE(:deadline, "%d/%m/%Y %H:%i"), :completed) WHERE userid = :userid');
+            $query = $this->writeDB->prepare('INSERT INTO tbltasks (userid, title, description, deadline, completed) VALUES (:userid, :title, :description, STR_TO_DATE(:deadline, "%d/%m/%Y %H:%i"), :completed)');
+            $query->bindParam(':userid', $returned_userid, PDO::PARAM_INT);
             $query->bindParam(':title', $title, PDO::PARAM_STR);
             $query->bindParam(':description', $description, PDO::PARAM_STR);
             $query->bindParam(':deadline', $deadline, PDO::PARAM_STR);
             $query->bindParam(':completed', $completed, PDO::PARAM_STR);
-            $query->bindParam(':userid', $returned_userid, PDO::PARAM_INT);
             $query->execute();
 
             $rowCount = $query->rowCount();
@@ -82,7 +80,6 @@ class Create{
                 exit();
             }
 
-            // get last id of the item we just inserted
             $lastTaskID = $this->writeDB->lastInsertId();
 
             $query = $this->readDB->prepare('SELECT id, title, description, DATE_FORMAT(deadline, "%d/%m/%Y %H:%i") AS deadline, completed FROM tbltasks WHERE id = :taskid AND userid = :userid');
@@ -122,17 +119,16 @@ class Create{
         } catch (TaskException $ex) {
             $response = new Response();
             $response->setSuccess(false);
-            // 400 because the client data is wrong
             $response->setHttpStatusCode(400);
             $response->addMessage($ex->getMessage());
             $response->send();
             exit();
         } catch (PDOException $ex) {
-            error_log('Datasbase querry error - ' . $ex, 0);
+            error_log('Database query error - ' . $ex, 0);
             $response = new Response();
             $response->setSuccess(false);
             $response->setHttpStatusCode(500);
-            $response->addMessage('Failed to insert into database - check submitted data for errors: ' . $ex);
+            $response->addMessage('Failed to insert into database - check submitted data for errors: ' . $ex->getMessage());
             $response->send();
             exit();
         }
