@@ -33,6 +33,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
     exit;
 }
 
+// Check if CONTENT_TYPE is set before accessing it
+$contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
+
+if (empty($contentType)) {
+    // Handle the case where the content type is missing
+    $response = new Response();
+    $response->setSuccess(false);
+    $response->setHttpStatusCode(400);
+    $response->addMessage("Content-Type header is missing");
+    $response->send();
+    exit();
+}
+
 // check if the user isn't using the correct post method
 // we will always be using post for user related requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST'){
