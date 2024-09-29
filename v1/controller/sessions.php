@@ -19,6 +19,21 @@ catch (PDOException $ex)
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
+    // only allowed methods are POST and OPTIONS
+    header('Access-Control-Allow-Methods: POST, PATCH, DELETE, OPTIONS');
+    // set the headers that are allowed
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    // set the max age of the preflight request. 
+    // the same response can be called without sending a preflight request for the duration.
+    header('Access-Control-Max-Age: 86400');
+    $response = new Response();
+    $response->setSuccess(true);
+    $response->setHttpStatusCode(200);
+    $response->send();
+    exit;
+}
+
 // Delete or update a specific session
 if (array_key_exists("sessionid", $_GET)){
 
