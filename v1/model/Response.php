@@ -9,6 +9,17 @@ class Response {
     private $_toCache = false;
     private $_responseData = array();
 
+    public function __construct($success, $httpStatusCode, $message = null, $data = null, $toCache = false) {
+        $this->_success = $success;
+        $this->_httpStatusCode = $httpStatusCode;
+        if ($message !== null) {
+            is_array($message) ? $this->_message = $message : $this->_message[] = $message;
+        }
+        $this->_data = $data;
+        $this->_toCache = $toCache;
+        $this->send();
+    }
+
     public function setSuccess($success) {
         $this->_success = $success;
     }

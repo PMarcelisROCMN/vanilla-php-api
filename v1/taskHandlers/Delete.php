@@ -19,26 +19,14 @@ class Delete {
 
             // if rowcount is 0, then the task was not found
             if ($rowCount === 0) {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(404);
-                $response->addMessage("Task not found");
-                $response->send();
+                new Response(false, 404, "Task not found");
                 exit();
             }
 
-            $response = new Response();
-            $response->setSuccess(true);
-            $response->setHttpStatusCode(200);
-            $response->addMessage("Task deleted");
-            $response->send();
+            new Response(true, 200, "Task deleted");
             exit();
         } catch (PDOException $ex) {
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage("There was an issue deleting a task");
-            $response->send();
+            new Response(false, 500, "There was an issue deleting a task");
             exit();
         }
     }

@@ -13,11 +13,7 @@ class Create{
     public function createTask($returned_userid){
         try {
             if ($_SERVER['CONTENT_TYPE'] !== 'application/json') {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(400);
-                $response->addMessage("Content type header is not set to JSON");
-                $response->send();
+                new Response(false, 400, "Content type header is not set to JSON");
                 exit();
             }
 
@@ -30,21 +26,15 @@ class Create{
             $rawPOSTData = file_get_contents('php://input');
 
             if (!$jsonData = json_decode($rawPOSTData)) {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(400);
-                $response->addMessage("Request body is not valid JSON");
-                $response->send();
+                new Response(false, 400, "Request body is not valid JSON");
                 exit();
             }
 
             if (!isset($jsonData->title) || !isset($jsonData->completed)) {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(400);
-                (!isset($jsonData->title) ? $response->addMessage("Title field is mandatory and must be provided") : false);
-                (!isset($jsonData->completed) ? $response->addMessage("Completed field is mandatory and must be provided") : false);
-                $response->send();
+                $messages = [];
+                !isset($jsonData->title) ? $messages[] = "Title field is mandatory and must be provided" : null;
+                !isset($jsonData->completed) ? $messages[] = "Completed field is mandatory and must be provided" : null;
+                new Response(false, 400, $messages);
                 exit();
             }
 
@@ -72,11 +62,7 @@ class Create{
             $rowCount = $query->rowCount();
 
             if ($rowCount === 0) {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(500);
-                $response->addMessage("Failed to create task");
-                $response->send();
+                new Response(false, 500, "Failed to create task");
                 exit();
             }
 
@@ -90,11 +76,7 @@ class Create{
             $rowCount = $query->rowCount();
 
             if ($rowCount === 0) {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(500);
-                $response->addMessage("Failed to retrieve task after creation");
-                $response->send();
+                new Response(false, 500, "Failed to retrieve task after creation");
                 exit();
             }
 
@@ -109,27 +91,14 @@ class Create{
             $returnData['rows_returned'] = $rowCount;
             $returnData['tasks'] = $taskArray;
 
-            $response = new Response();
-            $response->setSuccess(true);
-            $response->setHttpStatusCode(201);
-            $response->addMessage("Task created");
-            $response->setData($returnData);
-            $response->send();
+            new Response(true, 201, "Task created", $returnData);
             exit();
         } catch (TaskException $ex) {
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(400);
-            $response->addMessage($ex->getMessage());
-            $response->send();
+            new Response(false, 400, $ex->getMessage());
             exit();
         } catch (PDOException $ex) {
             error_log('Database query error - ' . $ex, 0);
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage('Failed to insert into database - check submitted data for errors: ' . $ex->getMessage());
-            $response->send();
+            new Response(false, 500, 'Failed to insert into database - check submitted data for errors: ' . $ex->getMessage());
             exit();
         }
     }

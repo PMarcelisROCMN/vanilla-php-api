@@ -9,12 +9,7 @@ try {
 }
 catch (Exception $ex) {
     error_log("Connection error: " . $ex->getMessage(), 0);
-
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(500);
-    $response->addMessage("Database connection error");
-    $response->send();
+    new Response(false, 500, "Database connection error");
     exit;
 }
 
@@ -23,13 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
     header('Access-Control-Allow-Methods: POST, OPTIONS');
     // set the headers that are allowed
     header('Access-Control-Allow-Headers: Content-Type');
-    // set the max age of the preflight request. 
+    // set the max age of the preflight request.
     // the same response can be called without sending a preflight request for the duration.
     header('Access-Control-Max-Age: 86400');
-    $response = new Response();
-    $response->setSuccess(true);
-    $response->setHttpStatusCode(200);
-    $response->send();
+    new Response(true, 200);
     exit;
 }
 
@@ -38,32 +30,20 @@ $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
 
 if (empty($contentType)) {
     // Handle the case where the content type is missing
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(400);
-    $response->addMessage("Content-Type header is missing");
-    $response->send();
+    new Response(false, 400, "Content-Type header is missing");
     exit();
 }
 
 // check if the user isn't using the correct post method
 // we will always be using post for user related requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST'){
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(405);
-    $response->addMessage("Request method not allowed");
-    $response->send();
+    new Response(false, 405, "Request method not allowed");
     exit;
 }
 
 // check if the content type is set to json
 if ($_SERVER['CONTENT_TYPE'] !== 'application/json'){
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(400);
-    $response->addMessage("Content type header not set to JSON");
-    $response->send();
+    new Response(false, 400, "Content type header not set to JSON");
     exit;
 }
 
@@ -72,23 +52,17 @@ $rawPOSTData = file_get_contents('php://input');
 
 // check if the json data is valid
 if (!$jsonData = json_decode($rawPOSTData)){
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(400);
-    $response->addMessage("Request body is not valid JSON");
-    $response->send();
+    new Response(false, 400, "Request body is not valid JSON");
     exit;
 }
 
 // check if the required fields are set
 if (!isset($jsonData->fullname) || !isset($jsonData->username) || !isset($jsonData->password)){
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(400);
-    (!isset($jsonData->fullname) ? $response->addMessage("Full name field is mandatory") : false);
-    (!isset($jsonData->username) ? $response->addMessage("Username field is mandatory") : false);
-    (!isset($jsonData->password) ? $response->addMessage("Password field is mandatory") : false);
-    $response->send();
+    $messages = [];
+    !isset($jsonData->fullname) ? $messages[] = "Full name field is mandatory" : null;
+    !isset($jsonData->username) ? $messages[] = "Username field is mandatory" : null;
+    !isset($jsonData->password) ? $messages[] = "Password field is mandatory" : null;
+    new Response(false, 400, $messages);
     exit;
 }
 
@@ -96,16 +70,14 @@ if (!isset($jsonData->fullname) || !isset($jsonData->username) || !isset($jsonDa
 // check if the fields are too long
 // Could add more fields to make sure that users have specific requirements for creating an account (e.g password must contain a number, a special character, etc)
 if (strlen($jsonData->fullname) < 1 || strlen($jsonData->fullname) > 255 || strlen($jsonData->username) < 1 || strlen($jsonData->username) > 255 || strlen($jsonData->password) < 1 || strlen($jsonData->password) > 255){
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(400);
-    (strlen($jsonData->fullname) < 1 ? $response->addMessage("Full name cannot be blank") : false);
-    (strlen($jsonData->fullname) > 255 ? $response->addMessage("Full name cannot be greater than 255 characters") : false);
-    (strlen($jsonData->username) < 1 ? $response->addMessage("Username cannot be blank") : false);
-    (strlen($jsonData->username) > 255 ? $response->addMessage("Username cannot be greater than 255 characters") : false);
-    (strlen($jsonData->password) < 1 ? $response->addMessage("Password cannot be blank") : false);
-    (strlen($jsonData->password) > 255 ? $response->addMessage("Password cannot be greater than 255 characters") : false);
-    $response->send();
+    $messages = [];
+    strlen($jsonData->fullname) < 1 ? $messages[] = "Full name cannot be blank" : null;
+    strlen($jsonData->fullname) > 255 ? $messages[] = "Full name cannot be greater than 255 characters" : null;
+    strlen($jsonData->username) < 1 ? $messages[] = "Username cannot be blank" : null;
+    strlen($jsonData->username) > 255 ? $messages[] = "Username cannot be greater than 255 characters" : null;
+    strlen($jsonData->password) < 1 ? $messages[] = "Password cannot be blank" : null;
+    strlen($jsonData->password) > 255 ? $messages[] = "Password cannot be greater than 255 characters" : null;
+    new Response(false, 400, $messages);
     exit;
 }
 
@@ -124,12 +96,8 @@ try {
 
     // check if the username already exists
     if ($rowCount !== 0){
-        $response = new Response();
-        $response->setSuccess(false);
         // 409 is a conflict status code
-        $response->setHttpStatusCode(409);
-        $response->addMessage("Username already exists");
-        $response->send();
+        new Response(false, 409, "Username already exists");
         exit;
     }
 
@@ -145,11 +113,7 @@ try {
     $rowCount = $stmt->rowCount();
 
     if ($rowCount === 0){
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(500);
-        $response->addMessage("There was an issue creating a user account - please try again");
-        $response->send();
+        new Response(false, 500, "There was an issue creating a user account - please try again");
         exit;
     }
 
@@ -160,20 +124,11 @@ try {
     $returnData['fullname'] = $fullname;
     $returnData['username'] = $username;
 
-    $response = new Response();
-    $response->setSuccess(true);
-    $response->setHttpStatusCode(201);
-    $response->addMessage("User created");
-    $response->setData($returnData);
-    $response->send();
+    new Response(true, 201, "User created", $returnData);
     exit;
-    
+
 }
 catch (PDOException $ex){
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(500);
-    $response->addMessage("There was an issue creating a user account - please try again");
-    $response->send();
+    new Response(false, 500, "There was an issue creating a user account - please try again");
     exit;
 }

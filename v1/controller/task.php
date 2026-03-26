@@ -9,29 +9,24 @@ require_once('../taskHandlers/Update.php');
 require_once('../taskHandlers/Read.php');
 require_once('../taskHandlers/Delete.php');
 
+
+// Start with the DB connection
 try {
     $writeDB = DB::connectWriteDB();
     $readDB = DB::connectReadDB();
 } catch (PDOException $ex) {
     error_log("Connection error - " . $ex, 0);
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(500);
-    $response->addMessage("Database connection error");
-    $response->send();
+    new Response(false, 500, "Database connection error . " . $ex->getMessage());
     exit();
 }
 
 
 // Integration of authentication script
 if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATION']) < 1) {
-    $response = new Response();
-    $response->setSuccess(false);
-    // no access
-    $response->setHttpStatusCode(401);
-    !isset($_SERVER['HTTP_AUTHORIZATION']) ? $response->addMessage("Access token is missing from the header") : false;
-    strlen($_SERVER['HTTP_AUTHORIZATION']) < 1 ? $response->addMessage("Access token cannot be blank") : false;
-    $response->send();
+    $messages = [];
+    !isset($_SERVER['HTTP_AUTHORIZATION']) ? $messages[] = "Access token is missing from the header" : null;
+    strlen($_SERVER['HTTP_AUTHORIZATION']) < 1 ? $messages[] = "Access token cannot be blank" : null;
+    new Response(false, 401, $messages);
     exit();
 }
 
@@ -45,11 +40,7 @@ try {
     $rowCount = $query->rowCount();
 
     if ($rowCount === 0) {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(401);
-        $response->addMessage("Invalid access token");
-        $response->send();
+        new Response(false, 401, "Invalid access token");
         exit();
     }
 
@@ -61,40 +52,24 @@ try {
     $returned_loginattempts = $row['loginattempts'];
 
     if ($returned_useractive !== 'Y') {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(401);
-        $response->addMessage("User account not active");
-        $response->send();
+        new Response(false, 401, "User account not active");
         exit();
     }
 
     // check if the access token has expired
     $accesstokenexpiry = strtotime($returned_accesstokenexpiry);
     if ($accesstokenexpiry < time()) {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(401);
-        $response->addMessage("Access token has expired");
-        $response->send();
+        new Response(false, 401, "Access token has expired");
         exit();
     }
 
     // check if the user has too many login attempts
     if ($returned_loginattempts >= 3) {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(401);
-        $response->addMessage("User account is currently locked out");
-        $response->send();
+        new Response(false, 401, "User account is currently locked out");
         exit();
     }
 } catch (PDOException $ex) {
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(500);
-    $response->addMessage("There was an issue authenticating - please try again");
-    $response->send();
+    new Response(false, 500, "There was an issue authenticating - please try again");
     exit();
 }
 // end of authentication script
@@ -104,13 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
     header('Access-Control-Allow-Methods: POST, GET, PATCH, DELETE, OPTIONS');
     // set the headers that are allowed
     header('Access-Control-Allow-Headers: Content-Type, Authorization');
-    // set the max age of the preflight request. 
+    // set the max age of the preflight request.
     // the same response can be called without sending a preflight request for the duration.
     header('Access-Control-Max-Age: 86400');
-    $response = new Response();
-    $response->setSuccess(true);
-    $response->setHttpStatusCode(200);
-    $response->send();
+    new Response(true, 200);
     exit;
 }
 
@@ -122,16 +94,12 @@ $taskUpdate = new Update($writeDB);
 
 // check if the key 'taskid' is in the query string
 if (array_key_exists("taskid", $_GET)) {
-    
+
     $taskid = $_GET['taskid'];
 
     if ($taskid == '' || !is_numeric($taskid)) {
-        $response = new Response();
-        // declined request because of client data
-        $response->setHttpStatusCode(400);
-        $response->setSuccess(false);
-        $response->addMessage("Task ID cannot be blank or must be numeric");
-        $response->send();
+        new Response(false, 400, "Task ID cannot be blank or must be numeric");
+        exit();
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -141,11 +109,8 @@ if (array_key_exists("taskid", $_GET)) {
     } elseif ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
         $taskUpdate->updatetask($taskid, $returned_userid);
     } else {
-        $response = new Response();
-        $response->setHttpStatusCode(405);
-        $response->setSuccess(false);
-        $response->addMessage("Request method not allowed");
-        $response->send();
+        new Response(false, 405, "Request method not allowed");
+        exit();
     }
 }
 // to get all tasks that are completed or incompleted
@@ -155,22 +120,14 @@ else if (array_key_exists("completed", $_GET)) {
     $completed = $_GET["completed"];
 
     if ($completed !== 'Y' && $completed !== 'N') {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(400);
-        $response->addMessage("Completed filter must be Y or N.");
-        $response->send();
+        new Response(false, 400, "Completed filter must be Y or N.");
         exit();
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $taskRead->getCompleteTasks($completed, $returned_userid);
     } else {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(405);
-        $response->addMessage("Request method not allowed");
-        $response->send();
+        new Response(false, 405, "Request method not allowed");
         exit();
     }
 } else if (array_key_exists("page", $_GET)) {
@@ -178,11 +135,7 @@ else if (array_key_exists("completed", $_GET)) {
     $page = $_GET['page'];
 
     if ($page == '' || !is_numeric($page)) {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(400);
-        $response->addMessage("Page number cannot be blank and must be numeric");
-        $response->send();
+        new Response(false, 400, "Page number cannot be blank and must be numeric");
         exit();
     }
 
@@ -193,11 +146,7 @@ else if (array_key_exists("completed", $_GET)) {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $taskRead->getTasksPage($returned_userid, $page, $limitPerPage);
     } else {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(405);
-        $response->addMessage("Request method not allowed");
-        $response->send();
+        new Response(false, 405, "Request method not allowed");
         exit();
     }
 }
@@ -209,18 +158,10 @@ else if (empty($_GET)) {
     } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $taskCreate->createTask($returned_userid);
     } else {
-        $response = new Response();
-        $response->setSuccess(false);
-        $response->setHttpStatusCode(405);
-        $response->addMessage("Request method not allowed");
-        $response->send();
+        new Response(false, 405, "Request method not allowed");
         exit();
     }
 } else {
-    $response = new Response();
-    $response->setSuccess(false);
-    $response->setHttpStatusCode(404);
-    $response->addMessage("Endpoint not found");
-    $response->send();
+    new Response(false, 404, "Endpoint not found");
     exit();
 }

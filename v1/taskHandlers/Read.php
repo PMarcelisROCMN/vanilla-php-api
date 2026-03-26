@@ -27,27 +27,14 @@ class Read {
             $returnData['rows_returned'] = $rowCount;
             $returnData['tasks'] = $taskArray;
 
-            $response = new Response();
-            $response->setSuccess(true);
-            $response->setHttpStatusCode(200);
-            $response->toCache(true);
-            $response->setData($returnData);
-            $response->send();
+            new Response(true, 200, null, $returnData, true);
             exit();
         } catch (TaskException $ex) {
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage($ex->getMessage());
-            $response->send();
+            new Response(false, 500, $ex->getMessage());
             exit();
         } catch (PDOException $ex) {
             error_log("Database query error - " . $ex, 0);
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage("There was an issue retrieving tasks");
-            $response->send();
+            new Response(false, 500, "There was an issue retrieving tasks");
             exit();
         }
     }
@@ -64,11 +51,7 @@ class Read {
 
             $rowCount = $query->rowCount();
             if ($rowCount === 0) {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(404);
-                $response->addMessage("Task not found");
-                $response->send();
+                new Response(false, 404, "Task not found");
                 exit();
             }
 
@@ -87,27 +70,13 @@ class Read {
             $returnData['rows_returned'] = $rowCount;
             $returnData['tasks'] = $taskArray;
 
-            $response = new Response();
-            $response->setSuccess(true);
-            $response->setHttpStatusCode(200);
-            $response->addMessage("Task retrieved");
-            $response->setData($returnData);
-            $response->toCache(true);
-            $response->send();
+            new Response(true, 200, "Task retrieved", $returnData, true);
             exit();
         } catch (TaskException $ex) {
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(400);
-            $response->addMessage($ex->getMessage());
-            $response->send();
+            new Response(false, 400, $ex->getMessage());
             exit();
         } catch (PDOException $ex) {
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage("There was an issue retrieving a task");
-            $response->send();
+            new Response(false, 500, "There was an issue retrieving a task");
             exit();
         }
     }
@@ -133,27 +102,14 @@ class Read {
             $returnData['rows_returned'] = $rowCount;
             $returnData['tasks'] = $taskArray;
 
-            $response = new Response();
-            $response->setSuccess(true);
-            $response->setHttpStatusCode(200);
-            $response->toCache(true);
-            $response->setData($returnData);
-            $response->send();
+            new Response(true, 200, null, $returnData, true);
             exit();
         } catch (TaskException $ex) {
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage($ex->getMessage());
-            $response->send();
+            new Response(false, 500, $ex->getMessage());
             exit();
         } catch (PDOException $ex) {
             error_log("Database query error - " . $ex, 0);
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage("There was an issue retrieving tasks");
-            $response->send();
+            new Response(false, 500, "There was an issue retrieving tasks");
             exit();
         }
     }
@@ -177,11 +133,7 @@ class Read {
             }
 
             if ($page > $numOfPages || $page == 0) {
-                $response = new Response();
-                $response->setSuccess(false);
-                $response->setHttpStatusCode(404);
-                $response->addMessage("Page not found");
-                $response->send();
+                new Response(false, 404, "Page not found");
                 exit();
             }
 
@@ -191,8 +143,8 @@ class Read {
             // e.g. if page is 2, then offset would be 2 * (2 - 1) = 2 || if the limitPerPage is 20, then offset would be 20 * (2 - 1) = 20
             $offset = ($page == 1 ? 0 : ($limitPerPage * ($page - 1)));
 
-            $query = $this->readDB->prepare('SELECT id, title, description, DATE_FORMAT(deadline, "%d/%m/%Y %H:%i") as deadline, completed 
-            FROM tbltasks 
+            $query = $this->readDB->prepare('SELECT id, title, description, DATE_FORMAT(deadline, "%d/%m/%Y %H:%i") as deadline, completed
+            FROM tbltasks
             WHERE userid = :userid
             LIMIT :pglimit OFFSET :offset');
 
@@ -217,27 +169,14 @@ class Read {
             $returnData['has_previous_page'] = $page > 1;
             $returnData['tasks'] = $taskArray;
 
-            $response = new Response();
-            $response->setSuccess(true);
-            $response->setHttpStatusCode(200);
-            $response->toCache(true);
-            $response->setData($returnData);
-            $response->send();
+            new Response(true, 200, null, $returnData, true);
             exit();
         } catch (TaskException $ex) {
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage($ex->getMessage());
-            $response->send();
+            new Response(false, 500, $ex->getMessage());
             exit();
         } catch (PDOException $ex) {
             error_log("Database query error - " . $ex, 0);
-            $response = new Response();
-            $response->setSuccess(false);
-            $response->setHttpStatusCode(500);
-            $response->addMessage("There was an issue retrieving tasks . $ex");
-            $response->send();
+            new Response(false, 500, "There was an issue retrieving tasks . $ex");
             exit();
         }
     }
